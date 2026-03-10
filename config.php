@@ -9,6 +9,9 @@ $data_dir = __DIR__ . '/_notes/';
 // Site title
 $site_title = 'EasyNote';
 
+// Default language ('en' or 'zh')
+$default_lang = 'zh';
+
 // Enable/disable API access
 $allow_api = true;
 
@@ -23,3 +26,4 @@ $default_note = '';
 
 // Encryption cipher
 $cipher = 'aes-256-cbc';
+

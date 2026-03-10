@@ -364,6 +364,42 @@ body::before {
     border-color: var(--color-primary);
 }
 
+/* === Language Toggle Button (Home) === */
+.btn-lang {
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: var(--bg-base);
+    box-shadow: var(--shadow-inset);
+    color: var(--color-text-secondary);
+    font-family: var(--font-family);
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+    z-index: 10;
+}
+
+.btn-lang:hover {
+    color: var(--color-text);
+    background: var(--bg-white-hover);
+    box-shadow: var(--shadow-subtle);
+}
+
+.btn-lang:active {
+    transform: scale(0.95);
+}
+
+/* Language Toggle Button (Editor header) */
+.btn-lang-editor {
+    text-decoration: none;
+}
+
 /* API Hint */
 .home-api-hint {
     display: flex;

@@ -1,9 +1,14 @@
 /**
  * EasyNote - Frontend Application
  * Auto-save, encryption, markdown toggle, keyboard shortcuts
+ * Uses window.LANG for i18n translations
  */
-(function() {
+(function () {
     'use strict';
+
+    // === i18n helper ===
+    var L = window.LANG || {};
+    function t(key) { return L[key] || key; }
 
     // === State ===
     var state = {
@@ -59,19 +64,19 @@
 
         // Set initial status
         if ($editor.value.length > 0) {
-            setStatus('saved', 'Saved');
+            setStatus('saved', t('saved'));
         }
     }
 
     // === Event Bindings ===
     function bindEvents() {
         // Auto-save on input
-        $editor.addEventListener('input', function() {
+        $editor.addEventListener('input', function () {
             scheduleSave();
         });
 
         // Tab key support
-        $editor.addEventListener('keydown', function(e) {
+        $editor.addEventListener('keydown', function (e) {
             if (e.key === 'Tab') {
                 e.preventDefault();
                 var start = this.selectionStart;
@@ -84,7 +89,7 @@
         });
 
         // Keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
+        document.addEventListener('keydown', function (e) {
             if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                 e.preventDefault();
                 forceSave();
@@ -109,10 +114,10 @@
 
         // Modal
         $modalCancel.addEventListener('click', closeModal);
-        $modalOverlay.addEventListener('click', function(e) {
+        $modalOverlay.addEventListener('click', function (e) {
             if (e.target === $modalOverlay) closeModal();
         });
-        $passwordInput.addEventListener('keydown', function(e) {
+        $passwordInput.addEventListener('keydown', function (e) {
             if (e.key === 'Enter') $modalConfirm.click();
         });
     }
@@ -121,7 +126,7 @@
     function scheduleSave() {
         if (state.saveTimer) clearTimeout(state.saveTimer);
         setStatus('', '');
-        state.saveTimer = setTimeout(function() {
+        state.saveTimer = setTimeout(function () {
             doSave();
         }, 1500);
     }
@@ -137,7 +142,7 @@
         if (state.saving) return;
 
         state.saving = true;
-        setStatus('saving', 'Saving...');
+        setStatus('saving', t('saving'));
 
         var body = { action: 'save', content: content };
         if (state.password) {
@@ -149,22 +154,22 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
         })
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-            state.saving = false;
-            if (data.status === 'ok') {
-                state.lastSavedContent = content;
-                setStatus('saved', 'Saved');
-            } else {
-                setStatus('error', 'Error');
-                showToast('Save failed: ' + (data.error || 'Unknown error'));
-            }
-        })
-        .catch(function(err) {
-            state.saving = false;
-            setStatus('error', 'Error');
-            showToast('Network error');
-        });
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                state.saving = false;
+                if (data.status === 'ok') {
+                    state.lastSavedContent = content;
+                    setStatus('saved', t('saved'));
+                } else {
+                    setStatus('error', t('error'));
+                    showToast(t('save_failed') + (data.error || t('unknown_error')));
+                }
+            })
+            .catch(function (err) {
+                state.saving = false;
+                setStatus('error', t('error'));
+                showToast(t('network_error'));
+            });
     }
 
     // === Status Indicator ===
@@ -183,7 +188,7 @@
             if (typeof marked !== 'undefined') {
                 $preview.innerHTML = marked.parse($editor.value);
             } else {
-                $preview.innerHTML = '<p style="color:var(--color-text-secondary)">Markdown library not loaded.</p>';
+                $preview.innerHTML = '<p style="color:var(--color-text-secondary)">' + t('md_not_loaded') + '</p>';
             }
             $editor.style.display = 'none';
             $preview.style.display = 'block';
@@ -200,26 +205,26 @@
         if (state.isEncrypted && state.password) {
             // Already encrypted and unlocked - offer to remove encryption
             showModal(
-                'Remove Encryption',
-                'Save this note without encryption? The current password will be removed.',
-                function(pwd) {
+                t('remove_encrypt'),
+                t('remove_encrypt_desc'),
+                function (pwd) {
                     state.password = null;
                     state.isEncrypted = false;
                     updateLockIcon(false);
                     closeModal();
                     forceSave();
-                    showToast('Encryption removed');
+                    showToast(t('encrypt_removed'));
                 },
                 true // no password needed
             );
         } else if (!state.isEncrypted) {
             // Set new password
             showModal(
-                'Set Password',
-                'Encrypt this note with a password. Anyone will need the password to view or edit.',
-                function(pwd) {
+                t('set_password'),
+                t('set_password_desc'),
+                function (pwd) {
                     if (!pwd) {
-                        showToast('Password cannot be empty');
+                        showToast(t('pwd_empty'));
                         return;
                     }
                     state.password = pwd;
@@ -227,7 +232,7 @@
                     updateLockIcon(true);
                     closeModal();
                     forceSave();
-                    showToast('Note encrypted');
+                    showToast(t('note_encrypted'));
                 }
             );
         }
@@ -236,14 +241,14 @@
     function showDecryptPrompt() {
         $editor.disabled = true;
         $editor.value = '';
-        $editor.placeholder = 'This note is encrypted. Enter password to unlock...';
+        $editor.placeholder = t('placeholder_encrypted');
 
         showModal(
-            'Unlock Note',
-            'This note is encrypted. Enter the password to decrypt and view its contents.',
-            function(pwd) {
+            t('unlock_note'),
+            t('unlock_desc'),
+            function (pwd) {
                 if (!pwd) {
-                    showToast('Password cannot be empty');
+                    showToast(t('pwd_empty'));
                     return;
                 }
                 // Try to decrypt
@@ -252,26 +257,26 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'decrypt', password: pwd })
                 })
-                .then(function(res) { return res.json(); })
-                .then(function(data) {
-                    if (data.error) {
-                        showToast('Invalid password');
-                        $passwordInput.value = '';
-                        $passwordInput.focus();
-                    } else {
-                        state.password = pwd;
-                        $editor.disabled = false;
-                        $editor.value = data.content;
-                        $editor.placeholder = 'Start typing your note...';
-                        state.lastSavedContent = data.content;
-                        closeModal();
-                        setStatus('saved', 'Saved');
-                        $editor.focus();
-                    }
-                })
-                .catch(function() {
-                    showToast('Network error');
-                });
+                    .then(function (res) { return res.json(); })
+                    .then(function (data) {
+                        if (data.error) {
+                            showToast(t('pwd_invalid'));
+                            $passwordInput.value = '';
+                            $passwordInput.focus();
+                        } else {
+                            state.password = pwd;
+                            $editor.disabled = false;
+                            $editor.value = data.content;
+                            $editor.placeholder = t('placeholder');
+                            state.lastSavedContent = data.content;
+                            closeModal();
+                            setStatus('saved', t('saved'));
+                            $editor.focus();
+                        }
+                    })
+                    .catch(function () {
+                        showToast(t('network_error'));
+                    });
             }
         );
     }
@@ -291,20 +296,21 @@
         $modalTitle.textContent = title;
         $modalDesc.textContent = desc;
         $passwordInput.value = '';
-        
+
         if (noPassword) {
             $passwordInput.style.display = 'none';
         } else {
             $passwordInput.style.display = '';
+            $passwordInput.placeholder = t('enter_password');
         }
 
         $modalOverlay.style.display = 'flex';
-        
+
         if (!noPassword) {
-            setTimeout(function() { $passwordInput.focus(); }, 100);
+            setTimeout(function () { $passwordInput.focus(); }, 100);
         }
 
-        $modalConfirm.onclick = function() {
+        $modalConfirm.onclick = function () {
             onConfirm($passwordInput.value);
         };
     }
@@ -316,11 +322,11 @@
     // === Copy URL ===
     function copyNoteUrl() {
         var url = window.location.href;
-        
+
         if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(url).then(function() {
-                showToast('URL copied to clipboard');
-            }).catch(function() {
+            navigator.clipboard.writeText(url).then(function () {
+                showToast(t('url_copied'));
+            }).catch(function () {
                 fallbackCopy(url);
             });
         } else {
@@ -337,9 +343,9 @@
         textarea.select();
         try {
             document.execCommand('copy');
-            showToast('URL copied to clipboard');
+            showToast(t('url_copied'));
         } catch (e) {
-            showToast('Failed to copy URL');
+            showToast(t('copy_failed'));
         }
         document.body.removeChild(textarea);
     }
@@ -348,7 +354,7 @@
     function showToast(message) {
         $toast.textContent = message;
         $toast.classList.add('show');
-        setTimeout(function() {
+        setTimeout(function () {
             $toast.classList.remove('show');
         }, 2500);
     }

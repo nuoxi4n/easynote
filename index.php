@@ -6,6 +6,20 @@
 
 require_once __DIR__ . '/config.php';
 
+// === Language Detection ===
+// Priority: ?lang= param > cookie > config default
+$supported_langs = ['en', 'zh'];
+$lang = $default_lang;
+
+if (isset($_GET['lang']) && in_array($_GET['lang'], $supported_langs)) {
+    $lang = $_GET['lang'];
+    setcookie('easynote_lang', $lang, time() + 86400 * 30, '/');
+} elseif (isset($_COOKIE['easynote_lang']) && in_array($_COOKIE['easynote_lang'], $supported_langs)) {
+    $lang = $_COOKIE['easynote_lang'];
+}
+
+$t = require __DIR__ . '/assets/lang/' . $lang . '.php';
+
 // Ensure data directory exists
 if (!is_dir($data_dir)) {
     mkdir($data_dir, 0755, true);
@@ -319,22 +333,45 @@ function showNotePage($note, $note_file) {
 }
 
 /**
+ * Build lang switch URL preserving current path
+ */
+function langSwitchUrl($target_lang) {
+    global $base_url;
+    $note_name = isset($_GET['note']) ? trim($_GET['note'], '/') : '';
+    $path = $note_name ? '/' . $note_name : '/';
+    return $base_url . $path . '?lang=' . $target_lang;
+}
+
+/**
  * Render the HTML page
  */
 function renderPage($note, $content, $encrypted, $is_home) {
-    global $site_title, $base_url;
+    global $site_title, $base_url, $t, $lang;
     
     $page_title = $is_home ? $site_title : htmlspecialchars($note) . ' - ' . $site_title;
     $content_escaped = htmlspecialchars($content, ENT_QUOTES, 'UTF-8');
     $note_escaped = htmlspecialchars($note, ENT_QUOTES, 'UTF-8');
     $base = $base_url;
+    $switch_lang = ($lang === 'zh') ? 'en' : 'zh';
+    $switch_url = langSwitchUrl($switch_lang);
+    
+    // Build JS translations object
+    $js_lang_keys = ['saved','saving','error','save_failed','unknown_error','network_error',
+                     'url_copied','copy_failed','pwd_empty','pwd_invalid','encrypt_removed',
+                     'note_encrypted','md_not_loaded','set_password','set_password_desc',
+                     'unlock_note','unlock_desc','remove_encrypt','remove_encrypt_desc',
+                     'placeholder','placeholder_encrypted','enter_password'];
+    $js_translations = [];
+    foreach ($js_lang_keys as $key) {
+        $js_translations[$key] = $t[$key];
+    }
     
 ?><!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="<?php echo $t['lang_html']; ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="EasyNote - A minimalist web notepad. Create, edit, and share notes instantly.">
+    <meta name="description" content="<?php echo htmlspecialchars($t['meta_description']); ?>">
     <meta name="theme-color" content="#F2F2F7">
     <title><?php echo $page_title; ?></title>
     <!-- Preload critical fonts -->
@@ -349,7 +386,7 @@ function renderPage($note, $content, $encrypted, $is_home) {
     html{font-size:16px}body{font-family:var(--font-family);background-color:var(--bg-base);color:var(--color-text);min-height:100vh;line-height:1.6;overflow-x:hidden}
     .home-container{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
     .glass-panel{background:var(--bg-white);backdrop-filter:blur(50px);-webkit-backdrop-filter:blur(50px);border:1px solid var(--border-inner);box-shadow:var(--shadow-float),inset 0 1px 0 rgba(255,255,255,0.5);position:relative}
-    .home-card{width:100%;max-width:520px;padding:48px 40px;border-radius:50px;text-align:center;animation:cardIn .6s cubic-bezier(.16,1,.3,1) both}
+    .home-card{width:100%;max-width:520px;padding:48px 40px;border-radius:50px;text-align:center;animation:cardIn .6s cubic-bezier(.16,1,.3,1) both;position:relative}
     @keyframes cardIn{from{opacity:0;transform:translateY(30px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
     .note-container{display:flex;flex-direction:column;min-height:100vh;padding:16px;gap:12px;max-width:960px;margin:0 auto}
     .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
@@ -364,21 +401,25 @@ function renderPage($note, $content, $encrypted, $is_home) {
     <!-- Home Page -->
     <main class="home-container">
         <div class="home-card glass-panel">
+            <a href="<?php echo htmlspecialchars($switch_url); ?>" class="btn-lang" title="<?php echo $t['lang_switch']; ?>" aria-label="<?php echo $t['lang_switch']; ?>">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                <span><?php echo $t['lang_switch']; ?></span>
+            </a>
             <div class="home-icon" aria-hidden="true">
                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/></svg>
             </div>
             <h1 class="home-title"><?php echo $site_title; ?></h1>
-            <p class="home-subtitle">MINIMALIST WEB NOTEPAD</p>
-            <p class="home-desc">Create a note by typing any name below. Your note will be accessible via URL.</p>
+            <p class="home-subtitle"><?php echo $t['subtitle']; ?></p>
+            <p class="home-desc"><?php echo $t['home_desc']; ?></p>
             <form class="home-form" id="homeForm" onsubmit="return goToNote()">
                 <div class="input-group">
-                    <label for="noteNameInput" class="sr-only">Note name</label>
+                    <label for="noteNameInput" class="sr-only"><?php echo $t['label_note_name']; ?></label>
                     <span class="input-prefix"><?php echo $_SERVER['HTTP_HOST'] . $base; ?>/</span>
-                    <input type="text" id="noteNameInput" class="note-name-input" placeholder="my-note" autofocus autocomplete="off" spellcheck="false" pattern="[a-zA-Z0-9_\-]+" title="Only letters, numbers, hyphens and underscores">
+                    <input type="text" id="noteNameInput" class="note-name-input" placeholder="my-note" autofocus autocomplete="off" spellcheck="false" pattern="[a-zA-Z0-9_\-]+" title="<?php echo $t['input_title']; ?>">
                 </div>
                 <button type="submit" class="btn-primary" id="goBtn">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                    <span>Open Note</span>
+                    <span><?php echo $t['open_note']; ?></span>
                 </button>
             </form>
             <div class="home-api-hint">
@@ -406,12 +447,13 @@ function renderPage($note, $content, $encrypted, $is_home) {
     <input type="hidden" id="noteName" value="<?php echo $note_escaped; ?>">
     <input type="hidden" id="isEncrypted" value="<?php echo $encrypted ? '1' : '0'; ?>">
     <input type="hidden" id="baseUrl" value="<?php echo $base; ?>">
+    <script>var LANG = <?php echo json_encode($js_translations, JSON_UNESCAPED_UNICODE); ?>;</script>
     
     <main class="note-container">
         <!-- Header Bar -->
         <header class="note-header glass-panel" role="banner">
             <div class="header-left">
-                <a href="<?php echo $base; ?>/" class="logo-link" title="Home" aria-label="Back to home">
+                <a href="<?php echo $base; ?>/" class="logo-link" title="Home" aria-label="<?php echo $t['btn_home']; ?>">
                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/></svg>
                 </a>
                 <span class="note-name-display"><?php echo $note_escaped; ?></span>
@@ -422,25 +464,29 @@ function renderPage($note, $content, $encrypted, $is_home) {
                     <span class="status-text"></span>
                 </span>
                 
-                <button class="btn-icon" id="btnMarkdown" title="Toggle Markdown Preview (Ctrl+M)" aria-label="Toggle Markdown Preview">
+                <button class="btn-icon" id="btnMarkdown" title="<?php echo $t['btn_markdown']; ?>" aria-label="<?php echo $t['btn_markdown']; ?>">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M13 8H7"/><path d="M17 12H7"/></svg>
                 </button>
                 
-                <button class="btn-icon" id="btnLock" title="Encryption Settings" aria-label="Encryption Settings">
+                <button class="btn-icon" id="btnLock" title="<?php echo $t['btn_lock']; ?>" aria-label="<?php echo $t['btn_lock']; ?>">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-unlock" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-lock" style="display:none" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 </button>
                 
-                <button class="btn-icon" id="btnCopy" title="Copy Note URL" aria-label="Copy Note URL">
+                <button class="btn-icon" id="btnCopy" title="<?php echo $t['btn_copy']; ?>" aria-label="<?php echo $t['btn_copy']; ?>">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
                 </button>
+
+                <a href="<?php echo htmlspecialchars($switch_url); ?>" class="btn-icon btn-lang-editor" title="<?php echo $t['lang_switch']; ?>" aria-label="<?php echo $t['lang_switch']; ?>">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                </a>
             </div>
         </header>
         
         <!-- Editor Area -->
         <div class="editor-wrapper glass-panel">
-            <label for="editor" class="sr-only">Note content</label>
-            <textarea id="editor" class="editor" placeholder="Start typing your note..." spellcheck="false"><?php echo $content_escaped; ?></textarea>
+            <label for="editor" class="sr-only"><?php echo $t['label_editor']; ?></label>
+            <textarea id="editor" class="editor" placeholder="<?php echo $t['placeholder']; ?>" spellcheck="false"><?php echo $content_escaped; ?></textarea>
             <div id="markdownPreview" class="markdown-preview" style="display:none"></div>
         </div>
     </main>
@@ -448,13 +494,13 @@ function renderPage($note, $content, $encrypted, $is_home) {
     <!-- Password Modal -->
     <div class="modal-overlay" id="modalOverlay" style="display:none">
         <div class="modal glass-panel" id="passwordModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-            <h3 class="modal-title" id="modalTitle">Set Password</h3>
-            <p class="modal-desc" id="modalDesc">Encrypt this note with a password. Anyone will need the password to view or edit.</p>
-            <label for="passwordInput" class="sr-only">Password</label>
-            <input type="password" id="passwordInput" class="modal-input" placeholder="Enter password" autocomplete="off">
+            <h3 class="modal-title" id="modalTitle"><?php echo $t['set_password']; ?></h3>
+            <p class="modal-desc" id="modalDesc"><?php echo $t['set_password_desc']; ?></p>
+            <label for="passwordInput" class="sr-only"><?php echo $t['label_password']; ?></label>
+            <input type="password" id="passwordInput" class="modal-input" placeholder="<?php echo $t['enter_password']; ?>" autocomplete="off">
             <div class="modal-actions">
-                <button class="btn-secondary" id="modalCancel">Cancel</button>
-                <button class="btn-primary btn-sm" id="modalConfirm">Confirm</button>
+                <button class="btn-secondary" id="modalCancel"><?php echo $t['cancel']; ?></button>
+                <button class="btn-primary btn-sm" id="modalConfirm"><?php echo $t['confirm']; ?></button>
             </div>
         </div>
     </div>

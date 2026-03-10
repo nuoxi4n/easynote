@@ -100,8 +100,17 @@ Edit `config.php`:
 |----------|---------|-------------|
 | `$data_dir` | `_notes/` | Notes storage directory |
 | `$site_title` | `EasyNote` | Site title |
+| `$default_lang` | `zh` | Default language (`en` or `zh`) |
 | `$allow_api` | `true` | Enable/disable API |
+
+### Language Switching
+
+- Set `$default_lang` in `config.php` to configure the default language
+- Users can switch languages via the globe button (🌐) in the UI
+- Language preference is saved in a cookie for 30 days
+- You can also switch via URL parameter: `?lang=en` or `?lang=zh`
 
 ## License
 
 MIT
+
