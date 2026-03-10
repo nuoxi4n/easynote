@@ -1,0 +1,4 @@
+# Deny access to note files
+<Files "*">
+    Require all denied
+</Files>

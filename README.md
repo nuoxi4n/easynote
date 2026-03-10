@@ -1,0 +1,107 @@
+# EasyNote
+
+A minimalist web notepad with API access, encryption support, and Markdown rendering.
+
+## Features
+
+- 📝 **Instant Notes** — Access any note by URL (`/my-note`)
+- 🔌 **API Access** — JSON/text API for AI and programmatic access
+- 🔒 **Encryption** — Per-note AES-256-CBC password protection
+- 📖 **Markdown** — Toggle rendered Markdown preview
+- 💾 **Auto-Save** — Content saved 1.5s after last keystroke
+- ⌨️ **Shortcuts** — `Ctrl+S` save, `Ctrl+M` markdown, `Tab` indent
+- 🎨 **Zen-iOS Hybrid UI** — Frosted glass, cold gray, tactile feedback
+- 📦 **Zero Dependencies** — No database, no CDN, all assets localized
+
+## Requirements
+
+- PHP 7.4+ with OpenSSL extension
+- Apache with `mod_rewrite` **or** Nginx
+
+## Installation
+
+1. Clone or copy files to your web server directory
+2. Ensure `_notes/` directory is writable: `chmod 755 _notes/`
+3. Enable `mod_rewrite` (Apache) or configure URL rewriting (Nginx)
+4. Visit your site!
+
+### Nginx Configuration
+
+```nginx
+location / {
+    try_files $uri $uri/ /index.php?note=$uri&$args;
+}
+
+location ~ ^/_notes/ {
+    deny all;
+}
+```
+
+## Usage
+
+| Action | URL |
+|--------|-----|
+| Home page | `/` |
+| Open/create note | `/my-note` |
+| API read (JSON) | `/api/my-note` |
+| API read (text) | `/api/my-note?raw=1` |
+| API write | `POST /api/my-note` |
+
+## API
+
+### Read Note
+
+```bash
+# JSON response
+curl https://your-site.com/api/my-note
+
+# Plain text
+curl https://your-site.com/api/my-note?raw=1
+
+# Encrypted note
+curl -H "X-Password: secret" https://your-site.com/api/my-note
+```
+
+**JSON Response:**
+```json
+{
+  "note": "my-note",
+  "content": "Hello, World!",
+  "exists": true,
+  "encrypted": false,
+  "length": 13,
+  "modified": "2025-01-01T12:00:00+00:00"
+}
+```
+
+### Write Note
+
+```bash
+# JSON body
+curl -X POST -H "Content-Type: application/json" \
+  -d '{"content":"Hello from API"}' \
+  https://your-site.com/api/my-note
+
+# With encryption
+curl -X POST -H "Content-Type: application/json" \
+  -d '{"content":"Secret note","password":"my-pass"}' \
+  https://your-site.com/api/my-note
+
+# Raw text body
+curl -X POST -d "Hello from API" \
+  https://your-site.com/api/my-note
+```
+
+## Configuration
+
+Edit `config.php`:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `$data_dir` | `_notes/` | Notes storage directory |
+| `$site_title` | `EasyNote` | Site title |
+| `$allow_api` | `true` | Enable/disable API |
+
+## License
+
+MIT
