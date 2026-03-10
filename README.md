@@ -1,5 +1,7 @@
 # EasyNote
 
+[简体中文](./README.zh-CN.md) | English
+
 A minimalist web notepad with API access, encryption support, and Markdown rendering.
 
 ## Features
