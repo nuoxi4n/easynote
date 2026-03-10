@@ -10,6 +10,7 @@
     font-display: swap;
     src: url('../fonts/Inter-Regular.ttf') format('truetype');
 }
+
 @font-face {
     font-family: 'Inter';
     font-style: normal;
@@ -17,6 +18,7 @@
     font-display: swap;
     src: url('../fonts/Inter-Medium.ttf') format('truetype');
 }
+
 @font-face {
     font-family: 'Inter';
     font-style: normal;
@@ -24,6 +26,7 @@
     font-display: swap;
     src: url('../fonts/Inter-SemiBold.ttf') format('truetype');
 }
+
 @font-face {
     font-family: 'Inter';
     font-style: normal;
@@ -31,6 +34,7 @@
     font-display: swap;
     src: url('../fonts/Inter-Bold.ttf') format('truetype');
 }
+
 @font-face {
     font-family: 'Inter';
     font-style: normal;
@@ -56,8 +60,8 @@
     --color-primary: #1C1C1E;
     --color-primary-hover: #2C2C2E;
     --color-text: #1C1C1E;
-    --color-text-secondary: #8E8E93;
-    --color-text-tertiary: #AEAEB2;
+    --color-text-secondary: #636366;
+    --color-text-tertiary: #8E8E93;
     --color-success: #34C759;
     --color-warning: #FF9500;
     --color-danger: #FF3B30;
@@ -73,7 +77,9 @@
 }
 
 /* === Reset & Base === */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -103,15 +109,21 @@ body::before {
     width: 200%;
     height: 200%;
     background: radial-gradient(ellipse at 30% 20%, rgba(120, 120, 255, 0.04) 0%, transparent 50%),
-                radial-gradient(ellipse at 70% 80%, rgba(255, 120, 120, 0.03) 0%, transparent 50%),
-                radial-gradient(ellipse at 50% 50%, rgba(120, 255, 180, 0.02) 0%, transparent 60%);
+        radial-gradient(ellipse at 70% 80%, rgba(255, 120, 120, 0.03) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(120, 255, 180, 0.02) 0%, transparent 60%);
     z-index: -1;
     animation: bgShift 20s ease-in-out infinite alternate;
+    will-change: transform;
 }
 
 @keyframes bgShift {
-    0% { transform: translate(0, 0) rotate(0deg); }
-    100% { transform: translate(-2%, -2%) rotate(3deg); }
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+
+    100% {
+        transform: translate(-2%, -2%) rotate(3deg);
+    }
 }
 
 /* === Glass Panel === */
@@ -158,6 +170,7 @@ body::before {
         opacity: 0;
         transform: translateY(30px) scale(0.96);
     }
+
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -396,8 +409,13 @@ body::before {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 /* === Header === */
@@ -494,8 +512,15 @@ body::before {
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
 }
 
 /* === Editor === */
@@ -571,7 +596,8 @@ body::before {
     margin: 0 0 12px;
 }
 
-.markdown-preview ul, .markdown-preview ol {
+.markdown-preview ul,
+.markdown-preview ol {
     margin: 0 0 12px;
     padding-left: 24px;
 }
@@ -639,7 +665,8 @@ body::before {
     overflow: hidden;
 }
 
-.markdown-preview th, .markdown-preview td {
+.markdown-preview th,
+.markdown-preview td {
     padding: 10px 14px;
     text-align: left;
     border: 1px solid var(--border-outer);
@@ -677,8 +704,13 @@ body::before {
 }
 
 @keyframes overlayIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .modal {
@@ -694,6 +726,7 @@ body::before {
         opacity: 0;
         transform: scale(0.92) translateY(10px);
     }
+
     to {
         opacity: 1;
         transform: scale(1) translateY(0);
@@ -858,4 +891,17 @@ body::before {
 /* === Selection === */
 ::selection {
     background: rgba(28, 28, 30, 0.15);
+}
+
+/* === Screen Reader Only === */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
