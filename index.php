@@ -485,7 +485,24 @@ function renderPage($note, $content, $encrypted, $is_home, $readonly = false) {
     @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
     <!-- Async load full stylesheet to maximize Lighthouse score -->
-    <link rel="preload" href="<?php echo $base; ?>/assets/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet';document.getElementById('globalLoader').style.opacity='0';setTimeout(()=>document.getElementById('globalLoader').remove(),400);document.querySelector('main').style.opacity='1';">
+    <link rel="preload" href="<?php echo $base; ?>/assets/css/style.css" as="style" id="mainStyle" onload="this.onload=null;this.rel='stylesheet';hideLoader();">
+    <script>
+        function hideLoader() {
+            var loader = document.getElementById('globalLoader');
+            var main = document.querySelector('main');
+            if(loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.remove(), 400);
+            }
+            if(main) main.style.opacity = '1';
+        }
+        // Fallback if onload doesn't fire (e.g., cached perfectly)
+        if(document.getElementById('mainStyle').sheet) {
+            hideLoader();
+        } else {
+            window.addEventListener('load', hideLoader);
+        }
+    </script>
     <noscript><style>main{opacity:1;}</style><link rel="stylesheet" href="<?php echo $base; ?>/assets/css/style.css"></noscript>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
 </head>
