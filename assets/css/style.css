@@ -667,116 +667,373 @@ body::before {
     background: rgba(255, 255, 255, 0.15);
 }
 
-/* === Markdown Preview === */
+/* === Markdown Preview — macOS Premium === */
 .markdown-preview {
     flex: 1;
-    padding: 28px 32px;
+    padding: 36px 40px;
     overflow-y: auto;
     height: 100%;
+    font-family: var(--font-family);
     font-size: 15px;
-    line-height: 1.8;
+    line-height: 1.85;
+    color: var(--color-text);
+    -webkit-font-smoothing: antialiased;
 }
 
+/* --- Headings --- */
 .markdown-preview h1 {
-    font-size: 1.8em;
+    font-size: 2em;
     font-weight: 800;
-    letter-spacing: -0.03em;
-    margin: 0 0 16px;
-    padding-bottom: 12px;
-    border-bottom: 2px solid var(--border-outer);
+    letter-spacing: -0.035em;
+    margin: 0 0 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-outer);
+    background: linear-gradient(135deg, var(--color-text) 0%, var(--color-text-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .markdown-preview h2 {
-    font-size: 1.5em;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    margin: 24px 0 12px;
+    font-size: 1.55em;
+    font-weight: 750;
+    letter-spacing: -0.025em;
+    margin: 32px 0 14px;
+    color: var(--color-text);
+    position: relative;
+    padding-left: 14px;
+}
+
+.markdown-preview h2::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 6px;
+    bottom: 6px;
+    width: 4px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, #007AFF, #5856D6);
 }
 
 .markdown-preview h3 {
     font-size: 1.2em;
     font-weight: 700;
-    margin: 20px 0 8px;
-}
-
-.markdown-preview p {
-    margin: 0 0 12px;
-}
-
-.markdown-preview ul,
-.markdown-preview ol {
-    margin: 0 0 12px;
+    margin: 26px 0 10px;
+    color: var(--color-text);
+    position: relative;
     padding-left: 24px;
 }
 
-.markdown-preview li {
-    margin: 4px 0;
+.markdown-preview h3::before {
+    content: '#';
+    position: absolute;
+    left: 0;
+    color: #007AFF;
+    font-weight: 800;
+    opacity: 0.5;
 }
 
-.markdown-preview code {
-    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
-    font-size: 0.88em;
-    background: var(--bg-base);
-    padding: 2px 7px;
-    border-radius: 6px;
-    box-shadow: var(--shadow-inset);
+.markdown-preview h4 {
+    font-size: 0.9em;
+    font-weight: 700;
+    margin: 22px 0 8px;
+    color: var(--color-text-secondary);
+    letter-spacing: 0.03em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.markdown-preview pre {
-    background: var(--bg-base);
-    border-radius: var(--radius-sm);
-    padding: 20px 24px;
+.markdown-preview h4::before {
+    content: '';
+    display: inline-block;
+    width: 16px;
+    height: 2px;
+    border-radius: 1px;
+    background: linear-gradient(90deg, #007AFF, transparent);
+    flex-shrink: 0;
+}
+
+/* --- Paragraphs & Text --- */
+.markdown-preview p {
     margin: 0 0 16px;
-    overflow-x: auto;
-    box-shadow: var(--shadow-inset);
+    color: var(--color-text);
 }
 
-.markdown-preview pre code {
-    background: none;
-    padding: 0;
-    box-shadow: none;
-    font-size: 13px;
-    line-height: 1.6;
+.markdown-preview strong {
+    font-weight: 700;
+    color: var(--color-text);
 }
 
-.markdown-preview blockquote {
-    border-left: 4px solid var(--color-primary);
-    padding: 12px 20px;
-    margin: 0 0 16px;
-    background: var(--bg-base);
-    border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
+.markdown-preview em {
+    font-style: italic;
     color: var(--color-text-secondary);
 }
 
+/* --- Lists --- */
+.markdown-preview ul,
+.markdown-preview ol {
+    margin: 16px 0;
+    padding-left: 24px;
+}
+
+.markdown-preview ul {
+    list-style: none;
+    padding-left: 20px;
+}
+
+.markdown-preview ul > li {
+    position: relative;
+    margin: 6px 0;
+    padding-left: 4px;
+}
+
+.markdown-preview ul > li::before {
+    content: '';
+    position: absolute;
+    left: -14px;
+    top: 11px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #007AFF, #5856D6);
+}
+
+.markdown-preview ol > li {
+    margin: 6px 0;
+}
+
+.markdown-preview li > ul,
+.markdown-preview li > ol {
+    margin: 4px 0 4px;
+}
+
+/* Task list checkboxes */
+.markdown-preview li input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border-outer);
+    border-radius: 4px;
+    vertical-align: middle;
+    margin-right: 8px;
+    margin-top: -2px;
+    position: relative;
+    cursor: default;
+    transition: var(--transition);
+}
+
+.markdown-preview li input[type="checkbox"]:checked {
+    background: linear-gradient(135deg, #007AFF, #5856D6);
+    border-color: transparent;
+}
+
+.markdown-preview li input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 1px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* --- Inline Code --- */
+.markdown-preview code {
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.85em;
+    background: rgba(0, 0, 0, 0.04);
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    color: #e83e8c;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* --- Code Blocks --- */
+.markdown-preview pre {
+    position: relative;
+    background: #1E1E2E;
+    border-radius: 8px;
+    padding: 0;
+    margin: 16px 0;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.markdown-preview pre::before {
+    content: '';
+    display: block;
+    height: 38px;
+    background: rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.markdown-preview pre::after {
+    content: '';
+    position: absolute;
+    top: 14px;
+    left: 16px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #FF5F57;
+    box-shadow: 18px 0 0 #FEBC2E, 36px 0 0 #28C840;
+}
+
+.markdown-preview pre code {
+    display: block;
+    background: none;
+    padding: 20px 24px;
+    border: none;
+    box-shadow: none;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #CDD6F4;
+    overflow-x: auto;
+    font-weight: 400;
+    white-space: pre;
+    -webkit-text-fill-color: initial;
+    user-select: text;
+    -webkit-user-select: text;
+    cursor: text;
+}
+
+.markdown-preview pre code::selection,
+.markdown-preview pre code *::selection {
+    background: rgba(0, 122, 255, 0.35);
+    color: #fff;
+}
+
+/* Copy button for code blocks */
+.markdown-preview pre .code-copy-btn {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.2s ease;
+    z-index: 2;
+    font-size: 0;
+}
+
+.markdown-preview pre:hover .code-copy-btn {
+    opacity: 1;
+}
+
+.markdown-preview pre .code-copy-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.8);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.markdown-preview pre .code-copy-btn:active {
+    transform: scale(0.9);
+}
+
+.markdown-preview pre .code-copy-btn.copied {
+    color: #28C840;
+    border-color: rgba(40, 200, 64, 0.3);
+    background: rgba(40, 200, 64, 0.1);
+}
+
+/* --- Blockquotes --- */
+.markdown-preview blockquote {
+    position: relative;
+    border-left: none;
+    padding: 16px 20px 16px 24px;
+    margin: 16px 0;
+    background: rgba(0, 122, 255, 0.04);
+    border-radius: 8px;
+    color: var(--color-text-secondary);
+    overflow: hidden;
+}
+
+.markdown-preview blockquote::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, #007AFF, #5856D6);
+}
+
+.markdown-preview blockquote p {
+    margin: 0;
+    color: var(--color-text-secondary);
+}
+
+.markdown-preview blockquote p + p {
+    margin-top: 8px;
+}
+
+/* Nested blockquotes */
+.markdown-preview blockquote blockquote {
+    margin: 12px 0 0;
+    background: rgba(0, 122, 255, 0.06);
+}
+
+/* --- Links --- */
 .markdown-preview a {
     color: #007AFF;
     text-decoration: none;
     font-weight: 500;
+    background: linear-gradient(transparent 92%, rgba(0, 122, 255, 0.25) 92%);
+    transition: all 0.2s ease;
 }
 
 .markdown-preview a:hover {
-    text-decoration: underline;
+    background: linear-gradient(transparent 85%, rgba(0, 122, 255, 0.35) 85%);
+    text-decoration: none;
 }
 
+/* --- Images --- */
 .markdown-preview img {
     max-width: 100%;
-    border-radius: var(--radius-sm);
-    box-shadow: var(--shadow-soft);
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--border-outer);
+    transition: var(--transition);
 }
 
+.markdown-preview img:hover {
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
+    transform: scale(1.005);
+}
+
+/* --- Tables --- */
 .markdown-preview table {
     width: 100%;
-    border-collapse: collapse;
-    margin: 0 0 16px;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 0 0 20px;
     border-radius: var(--radius-sm);
     overflow: hidden;
+    border: 1px solid var(--border-outer);
+    box-shadow: var(--shadow-subtle);
 }
 
 .markdown-preview th,
 .markdown-preview td {
-    padding: 10px 14px;
+    padding: 12px 16px;
     text-align: left;
-    border: 1px solid var(--border-outer);
+    border-bottom: 1px solid var(--border-outer);
 }
 
 .markdown-preview th {
@@ -784,15 +1041,47 @@ body::before {
     font-weight: 700;
     font-size: 11px;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
+    color: var(--color-text-secondary);
 }
 
+.markdown-preview td {
+    font-size: 14px;
+}
+
+.markdown-preview tr:last-child td {
+    border-bottom: none;
+}
+
+.markdown-preview tbody tr:nth-child(even) {
+    background: rgba(0, 0, 0, 0.015);
+}
+
+.markdown-preview tbody tr:hover {
+    background: rgba(0, 122, 255, 0.03);
+}
+
+/* --- Horizontal Rule --- */
 .markdown-preview hr {
     border: none;
-    height: 2px;
-    background: var(--border-outer);
-    margin: 24px 0;
-    border-radius: 1px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--border-outer) 20%, var(--border-outer) 80%, transparent);
+    margin: 32px 0;
+}
+
+/* --- Definition Lists --- */
+.markdown-preview dl {
+    margin: 0 0 16px;
+}
+
+.markdown-preview dt {
+    font-weight: 700;
+    margin-top: 12px;
+}
+
+.markdown-preview dd {
+    margin-left: 20px;
+    color: var(--color-text-secondary);
 }
 
 /* === Modal === */

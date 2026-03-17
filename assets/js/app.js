@@ -89,6 +89,7 @@
             $btnMarkdown.classList.add('active');
             if (typeof marked !== 'undefined') {
                 $preview.innerHTML = marked.parse($editor.value, { breaks: true });
+                addCodeCopyButtons();
             }
             $editor.style.display = 'none';
             $preview.style.display = 'block';
@@ -234,6 +235,36 @@
         $saveStatus.querySelector('.status-text').textContent = text;
     }
 
+    // === Code Block Copy Buttons ===
+    function addCodeCopyButtons() {
+        var blocks = $preview.querySelectorAll('pre');
+        var copySvg = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>';
+        var checkSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+        for (var i = 0; i < blocks.length; i++) {
+            (function (block) {
+                var btn = document.createElement('button');
+                btn.className = 'code-copy-btn';
+                btn.innerHTML = copySvg;
+                btn.setAttribute('aria-label', 'Copy code');
+                btn.addEventListener('click', function () {
+                    var code = block.querySelector('code');
+                    var text = code ? code.textContent : block.textContent;
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(text).then(function () {
+                            btn.innerHTML = checkSvg;
+                            btn.classList.add('copied');
+                            setTimeout(function () {
+                                btn.innerHTML = copySvg;
+                                btn.classList.remove('copied');
+                            }, 2000);
+                        });
+                    }
+                });
+                block.appendChild(btn);
+            })(blocks[i]);
+        }
+    }
+
     // === Markdown Toggle ===
     function toggleMarkdown() {
         state.markdownMode = !state.markdownMode;
@@ -242,6 +273,7 @@
         if (state.markdownMode) {
             if (typeof marked !== 'undefined') {
                 $preview.innerHTML = marked.parse($editor.value, { breaks: true });
+                addCodeCopyButtons();
             } else {
                 $preview.innerHTML = '<p style="color:var(--color-text-secondary)">' + t('md_not_loaded') + '</p>';
             }
@@ -547,6 +579,7 @@
                                 $btnMarkdown.classList.add('active');
                                 if (typeof marked !== 'undefined') {
                                     $preview.innerHTML = marked.parse($editor.value, { breaks: true });
+                                    addCodeCopyButtons();
                                 }
                                 $editor.style.display = 'none';
                                 $preview.style.display = 'block';
