@@ -476,41 +476,29 @@ function renderPage($note, $content, $encrypted, $is_home, $readonly = false) {
     <?php endif; ?>
     <meta name="theme-color" content="#F2F2F7">
     <title><?php echo $page_title; ?></title>
-    <!-- Preload critical fonts -->
-    <link rel="preload" href="<?php echo $base; ?>/assets/fonts/Inter-Regular.ttf" as="font" type="font/ttf" crossorigin>
-    <link rel="preload" href="<?php echo $base; ?>/assets/fonts/Inter-Bold.ttf" as="font" type="font/ttf" crossorigin>
-    <!-- Inline critical CSS to eliminate render-blocking -->
+    <!-- Inline CSS for the loader and to prevent FOUC -->
     <style>
-    @font-face{font-family:'Inter';font-style:normal;font-weight:400;font-display:swap;src:url('<?php echo $base; ?>/assets/fonts/Inter-Regular.ttf') format('truetype')}
-    @font-face{font-family:'Inter';font-style:normal;font-weight:700;font-display:swap;src:url('<?php echo $base; ?>/assets/fonts/Inter-Bold.ttf') format('truetype')}
-    :root{--bg-base:#F2F2F7;--bg-white:rgba(255,255,255,0.55);--border-inner:rgba(255,255,255,0.6);--border-outer:rgba(229,229,234,0.4);--shadow-float:0 24px 48px -12px rgba(0,0,0,0.08);--color-text:#1C1C1E;--color-text-secondary:#636366;--color-text-tertiary:#8E8E93;--font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
-    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-    html{font-size:16px;height:100%;height:100dvh}body{font-family:var(--font-family);background-color:var(--bg-base);color:var(--color-text);height:100%;line-height:1.6;overflow:hidden}
-    .home-container{display:flex;align-items:center;justify-content:center;height:100%;padding:24px;overflow:hidden}
-    .glass-panel{background:var(--bg-white);backdrop-filter:blur(50px);-webkit-backdrop-filter:blur(50px);border:1px solid var(--border-inner);box-shadow:var(--shadow-float),inset 0 1px 0 rgba(255,255,255,0.5);position:relative}
-    .home-card{width:100%;max-width:520px;padding:48px 40px;border-radius:50px;text-align:center;animation:cardIn .6s cubic-bezier(.16,1,.3,1) both;position:relative}
-    @keyframes cardIn{from{opacity:0;transform:translateY(30px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
-    .note-container{display:flex;flex-direction:column;height:100%;padding:16px;gap:12px;max-width:960px;margin:0 auto;overflow:hidden}
-    .editor-wrapper{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
-    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-    .lang-flag{width:20px;height:14px;border-radius:2px;object-fit:cover;display:block}
-    #globalLoader{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--bg-base);z-index:9999;display:flex;align-items:center;justify-content:center;transition:opacity .4s ease,visibility .4s ease}
-    #globalLoader.hidden{opacity:0;visibility:hidden}
-    .spinner{width:40px;height:40px;border:3px solid rgba(0,0,0,0.1);border-top-color:var(--color-text-secondary);border-radius:50%;animation:spin 1s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    body.is-loading {overflow: hidden;}
+    body { margin: 0; background: #F2F2F7; }
+    main { opacity: 0; transition: opacity 0.4s ease; }
+    #globalLoader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #F2F2F7; z-index: 9999; transition: opacity 0.4s ease; }
+    #globalLoader svg { width: 32px; height: 32px; color: #8E8E93; animation: spin 1s linear infinite; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
-    <!-- Async load full stylesheet to improve lighthouse score -->
-    <link rel="preload" href="<?php echo $base; ?>/assets/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet';document.getElementById('globalLoader').classList.add('hidden');document.body.classList.remove('is-loading');">
-    <noscript><link rel="stylesheet" href="<?php echo $base; ?>/assets/css/style.css"></noscript>
+    <!-- Async load full stylesheet to maximize Lighthouse score -->
+    <link rel="preload" href="<?php echo $base; ?>/assets/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet';document.getElementById('globalLoader').style.opacity='0';setTimeout(()=>document.getElementById('globalLoader').remove(),400);document.querySelector('main').style.opacity='1';">
+    <noscript><style>main{opacity:1;}</style><link rel="stylesheet" href="<?php echo $base; ?>/assets/css/style.css"></noscript>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
 </head>
-<body class="is-loading">
-    <!-- Global Loader -->
+<body>
+    <!-- Global Loader (Counts as FCP) -->
     <div id="globalLoader">
-        <div class="spinner"></div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line>
+            <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+            <line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line>
+            <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
+        </svg>
     </div>
-    
     <?php if ($is_home): ?>
     <!-- Home Page -->
     <main class="home-container">
