@@ -77,4 +77,7 @@ return [
     'readonly_removed' => '已移除只读保护',
     'readonly_save_blocked' => '此笔记为只读',
     'md_not_loaded' => 'Markdown 库未加载。',
+    'md_mode_on' => 'Markdown 模式已开启',
+    'md_mode_off' => 'Markdown 模式已关闭',
+    'encrypted_banner' => '已加密 — 输入密码以查看',
 ];

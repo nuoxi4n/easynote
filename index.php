@@ -298,7 +298,10 @@ function handleSaveRequest($note, $note_file, $meta_file) {
                 break;
             }
             $hash = password_hash($password, PASSWORD_DEFAULT);
-            saveNoteMeta($meta_file, ['readonly' => true, 'password_hash' => $hash]);
+            $meta = getNoteMeta($meta_file);
+            $meta['readonly'] = true;
+            $meta['password_hash'] = $hash;
+            saveNoteMeta($meta_file, $meta);
             echo json_encode(['status' => 'ok', 'readonly' => true], JSON_UNESCAPED_UNICODE);
             break;
             
@@ -321,12 +324,42 @@ function handleSaveRequest($note, $note_file, $meta_file) {
             $password = isset($json['password']) ? $json['password'] : '';
             $meta = getNoteMeta($meta_file);
             if (!empty($meta['readonly']) && password_verify($password, $meta['password_hash'])) {
-                @unlink($meta_file);
+                unset($meta['readonly'], $meta['password_hash']);
+                if (empty($meta)) {
+                    @unlink($meta_file);
+                } else {
+                    saveNoteMeta($meta_file, $meta);
+                }
                 echo json_encode(['status' => 'ok', 'readonly' => false], JSON_UNESCAPED_UNICODE);
             } else {
                 http_response_code(403);
                 echo json_encode(['error' => 'Invalid password'], JSON_UNESCAPED_UNICODE);
             }
+            break;
+            
+        case 'set_markdown':
+        case 'remove_markdown':
+            $meta = getNoteMeta($meta_file);
+            // Require readonly password if note is protected
+            if (!empty($meta['readonly'])) {
+                $roPwd = isset($json['readonly_password']) ? $json['readonly_password'] : '';
+                if (empty($roPwd) || !password_verify($roPwd, $meta['password_hash'])) {
+                    http_response_code(403);
+                    echo json_encode(['error' => 'readonly'], JSON_UNESCAPED_UNICODE);
+                    break;
+                }
+            }
+            if ($action === 'set_markdown') {
+                $meta['markdown'] = true;
+            } else {
+                unset($meta['markdown']);
+            }
+            if (empty($meta)) {
+                @unlink($meta_file);
+            } else {
+                saveNoteMeta($meta_file, $meta);
+            }
+            echo json_encode(['status' => 'ok', 'markdown' => ($action === 'set_markdown')], JSON_UNESCAPED_UNICODE);
             break;
             
         default:
@@ -403,6 +436,7 @@ function showNotePage($note, $note_file, $meta_file) {
     $content = '';
     $encrypted = false;
     $readonly = false;
+    $markdown = false;
     
     if (file_exists($note_file)) {
         $raw = file_get_contents($note_file);
@@ -412,13 +446,16 @@ function showNotePage($note, $note_file, $meta_file) {
         }
     }
     
-    // Check for read-only mode
+    // Check for read-only mode and markdown mode
     $meta = getNoteMeta($meta_file);
     if (!empty($meta['readonly'])) {
         $readonly = true;
     }
+    if (!empty($meta['markdown'])) {
+        $markdown = true;
+    }
     
-    renderPage($note, $content, $encrypted, false, $readonly);
+    renderPage($note, $content, $encrypted, false, $readonly, $markdown);
 }
 
 /**
@@ -434,7 +471,7 @@ function langSwitchUrl($target_lang) {
 /**
  * Render the HTML page
  */
-function renderPage($note, $content, $encrypted, $is_home, $readonly = false) {
+function renderPage($note, $content, $encrypted, $is_home, $readonly = false, $markdown = false) {
     global $site_title, $base_url, $t, $lang;
     
     $page_title = $is_home ? $site_title : htmlspecialchars($note) . ' - ' . $site_title;
@@ -457,7 +494,7 @@ function renderPage($note, $content, $encrypted, $is_home, $readonly = false) {
                      'set_readonly','set_readonly_desc','unlock_readonly','unlock_readonly_desc',
                      'remove_readonly','remove_readonly_desc','readonly_banner',
                      'readonly_set','readonly_unlocked','readonly_removed','readonly_save_blocked',
-                     'cancel','confirm'];
+                     'cancel','confirm','md_mode_on','md_mode_off','encrypted_banner'];
     $js_translations = [];
     foreach ($js_lang_keys as $key) {
         $js_translations[$key] = $t[$key];
@@ -588,6 +625,7 @@ function renderPage($note, $content, $encrypted, $is_home, $readonly = false) {
     <input type="hidden" id="noteName" value="<?php echo $note_escaped; ?>">
     <input type="hidden" id="isEncrypted" value="<?php echo $encrypted ? '1' : '0'; ?>">
     <input type="hidden" id="isReadonly" value="<?php echo $readonly ? '1' : '0'; ?>">
+    <input type="hidden" id="isMarkdown" value="<?php echo $markdown ? '1' : '0'; ?>">
     <input type="hidden" id="baseUrl" value="<?php echo $base; ?>">
     <script>var LANG = <?php echo json_encode($js_translations, JSON_UNESCAPED_UNICODE); ?>;</script>
     
@@ -625,6 +663,13 @@ function renderPage($note, $content, $encrypted, $is_home, $readonly = false) {
             </div>
         </header>
         
+        <?php if ($encrypted): ?>
+        <!-- Encrypted Banner -->
+        <div class="encrypted-banner" id="encryptedBanner">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span><?php echo $t['encrypted_banner']; ?></span>
+        </div>
+        <?php endif; ?>
         <?php if ($readonly): ?>
         <!-- Read-only Banner -->
         <div class="readonly-banner" id="readonlyBanner">

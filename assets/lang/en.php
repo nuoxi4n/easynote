@@ -77,4 +77,7 @@ return [
     'readonly_removed' => 'Read-only protection removed',
     'readonly_save_blocked' => 'This note is read-only',
     'md_not_loaded' => 'Markdown library not loaded.',
+    'md_mode_on' => 'Markdown mode enabled',
+    'md_mode_off' => 'Markdown mode disabled',
+    'encrypted_banner' => 'Encrypted — enter password to view',
 ];

@@ -16,13 +16,15 @@
         baseUrl: '',
         isEncrypted: false,
         isReadonly: false,
+        isMarkdown: false,
         readonlyUnlocked: false,
         readonlyPassword: null,
         password: null,
         markdownMode: false,
         saveTimer: null,
         lastSavedContent: '',
-        saving: false
+        saving: false,
+        forceSaveFlag: false
     };
 
     // === DOM Elements ===
@@ -31,6 +33,7 @@
     var $toast;
     var $iconLock, $iconUnlock;
     var $readonlyBanner;
+    var $encryptedBanner;
 
     // === Initialize ===
     function init() {
@@ -38,6 +41,7 @@
         state.baseUrl = document.getElementById('baseUrl').value;
         state.isEncrypted = document.getElementById('isEncrypted').value === '1';
         state.isReadonly = document.getElementById('isReadonly').value === '1';
+        state.isMarkdown = document.getElementById('isMarkdown').value === '1';
 
         $editor = document.getElementById('editor');
         $preview = document.getElementById('markdownPreview');
@@ -55,6 +59,7 @@
         $iconLock = $btnLock.querySelector('.icon-lock');
         $iconUnlock = $btnLock.querySelector('.icon-unlock');
         $readonlyBanner = document.getElementById('readonlyBanner');
+        $encryptedBanner = document.getElementById('encryptedBanner');
 
         // Track initial content
         state.lastSavedContent = $editor.value;
@@ -62,6 +67,9 @@
         // Handle initial states
         if (state.isEncrypted) {
             updateLockIcon(true);
+            $btnMarkdown.disabled = true;
+            $btnMarkdown.style.opacity = '0.3';
+            $btnMarkdown.style.pointerEvents = 'none';
             showDecryptPrompt();
         } else if (state.isReadonly) {
             updateLockIcon(true);
@@ -73,6 +81,17 @@
         // Set initial status
         if (!state.isReadonly && !state.isEncrypted && $editor.value.length > 0) {
             setStatus('saved', t('saved'));
+        }
+
+        // Auto-enter markdown preview if note is marked as markdown
+        if (state.isMarkdown && !state.isEncrypted) {
+            state.markdownMode = true;
+            $btnMarkdown.classList.add('active');
+            if (typeof marked !== 'undefined') {
+                $preview.innerHTML = marked.parse($editor.value, { breaks: true });
+            }
+            $editor.style.display = 'none';
+            $preview.style.display = 'block';
         }
     }
 
@@ -136,6 +155,14 @@
                 showReadonlyUnlockPrompt();
             });
         }
+
+        // Encrypted banner click
+        if ($encryptedBanner) {
+            $encryptedBanner.style.cursor = 'pointer';
+            $encryptedBanner.addEventListener('click', function () {
+                showDecryptPrompt();
+            });
+        }
     }
 
     // === Auto-Save ===
@@ -154,7 +181,7 @@
 
     function doSave() {
         var content = $editor.value;
-        if (content === state.lastSavedContent && !state.isEncrypted) return;
+        if (content === state.lastSavedContent && !state.isEncrypted && !state.forceSaveFlag) return;
         if (state.saving) return;
 
         // Block save for readonly (not unlocked)
@@ -184,6 +211,7 @@
                 state.saving = false;
                 if (data.status === 'ok') {
                     state.lastSavedContent = content;
+                    state.forceSaveFlag = false;
                     setStatus('saved', t('saved'));
                 } else if (data.error === 'readonly') {
                     setStatus('error', t('error'));
@@ -224,6 +252,39 @@
             $preview.style.display = 'none';
             $editor.focus();
         }
+
+        // Determine if we can persist the markdown mode change
+        var canPersist = false;
+        if (state.isReadonly && !state.readonlyUnlocked) {
+            // Readonly visitor: local toggle only, no persistence
+            return;
+        } else {
+            canPersist = true;
+        }
+
+        if (canPersist) {
+            // Persist markdown mode to backend
+            var action = state.markdownMode ? 'set_markdown' : 'remove_markdown';
+            var body = { action: action };
+            if (state.readonlyUnlocked && state.readonlyPassword) {
+                body.readonly_password = state.readonlyPassword;
+            }
+            fetch(state.baseUrl + '/' + state.noteName, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (data.status === 'ok') {
+                        state.isMarkdown = state.markdownMode;
+                        showToast(state.markdownMode ? t('md_mode_on') : t('md_mode_off'));
+                    }
+                })
+                .catch(function () {
+                    showToast(t('network_error'));
+                });
+        }
     }
 
     // === Lock / Protection ===
@@ -236,6 +297,7 @@
                 function (pwd) {
                     state.password = null;
                     state.isEncrypted = false;
+                    state.forceSaveFlag = true;
                     updateLockIcon(false);
                     closeModal();
                     forceSave();
@@ -469,9 +531,28 @@
                             $editor.value = data.content;
                             $editor.placeholder = t('placeholder');
                             state.lastSavedContent = data.content;
+                            // Hide encrypted banner
+                            if ($encryptedBanner) {
+                                $encryptedBanner.style.display = 'none';
+                            }
+                            // Re-enable markdown button
+                            $btnMarkdown.disabled = false;
+                            $btnMarkdown.style.opacity = '';
+                            $btnMarkdown.style.pointerEvents = '';
                             closeModal();
                             setStatus('saved', t('saved'));
-                            $editor.focus();
+                            // Auto-enter markdown preview if note is marked as markdown
+                            if (state.isMarkdown) {
+                                state.markdownMode = true;
+                                $btnMarkdown.classList.add('active');
+                                if (typeof marked !== 'undefined') {
+                                    $preview.innerHTML = marked.parse($editor.value, { breaks: true });
+                                }
+                                $editor.style.display = 'none';
+                                $preview.style.display = 'block';
+                            } else {
+                                $editor.focus();
+                            }
                         }
                     })
                     .catch(function () {

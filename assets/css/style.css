@@ -932,6 +932,28 @@ body::before {
     border-color: rgba(255, 193, 7, 0.4);
 }
 
+/* === Encrypted Banner === */
+.encrypted-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: rgba(0, 122, 255, 0.08);
+    border: 1px solid rgba(0, 122, 255, 0.2);
+    border-radius: var(--radius-sm);
+    color: #0055b3;
+    font-size: 12px;
+    font-weight: 600;
+    flex-shrink: 0;
+    transition: var(--transition);
+}
+
+.encrypted-banner:hover {
+    background: rgba(0, 122, 255, 0.14);
+    border-color: rgba(0, 122, 255, 0.35);
+}
+
 /* === Protection Choice Buttons === */
 .protection-choices {
     display: flex;
