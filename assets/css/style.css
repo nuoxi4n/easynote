@@ -637,6 +637,12 @@ body::before {
     border-radius: var(--radius-lg);
     overflow: hidden;
     min-height: 0;
+    box-shadow: none;
+    border: none;
+}
+
+.editor-wrapper::after {
+    display: none;
 }
 
 .editor {
@@ -782,13 +788,13 @@ body::before {
     padding-left: 20px;
 }
 
-.markdown-preview ul > li {
+.markdown-preview ul>li {
     position: relative;
     margin: 6px 0;
     padding-left: 4px;
 }
 
-.markdown-preview ul > li::before {
+.markdown-preview ul>li::before {
     content: '';
     position: absolute;
     left: -14px;
@@ -799,12 +805,12 @@ body::before {
     background: linear-gradient(135deg, #007AFF, #5856D6);
 }
 
-.markdown-preview ol > li {
+.markdown-preview ol>li {
     margin: 6px 0;
 }
 
-.markdown-preview li > ul,
-.markdown-preview li > ol {
+.markdown-preview li>ul,
+.markdown-preview li>ol {
     margin: 4px 0 4px;
 }
 
@@ -979,7 +985,7 @@ body::before {
     color: var(--color-text-secondary);
 }
 
-.markdown-preview blockquote p + p {
+.markdown-preview blockquote p+p {
     margin-top: 8px;
 }
 
