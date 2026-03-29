@@ -896,7 +896,7 @@ body::before {
     color: #e83e8c;
 }
 
-[data-theme="dark"] .markdown-preview code {
+[data-theme="dark"] .markdown-preview :not(pre) > code {
     background: rgba(255, 255, 255, 0.08);
     border-color: rgba(255, 255, 255, 0.1);
     color: #f694c1;
