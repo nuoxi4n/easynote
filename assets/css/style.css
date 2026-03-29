@@ -76,6 +76,30 @@
     --transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
+/* === Dark Theme Variables === */
+[data-theme="dark"] {
+    --bg-base: #1C1C1E;
+    --bg-base-alt: #2C2C2E;
+    --bg-white: rgba(44, 44, 46, 0.65);
+    --bg-white-hover: rgba(58, 58, 60, 0.75);
+    --bg-inset: rgba(28, 28, 30, 0.5);
+    --border-inner: rgba(58, 58, 60, 0.6);
+    --border-outer: rgba(68, 68, 70, 0.4);
+    --border-focus: rgba(255, 255, 255, 0.2);
+    --shadow-float: 0 24px 48px -12px rgba(0, 0, 0, 0.3);
+    --shadow-soft: 0 8px 24px -4px rgba(0, 0, 0, 0.25);
+    --shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.2);
+    --shadow-inset: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    --color-primary: #F5F5F7;
+    --color-primary-hover: #E5E5EA;
+    --color-text: #F5F5F7;
+    --color-text-secondary: #A1A1A6;
+    --color-text-tertiary: #8E8E93;
+    --color-success: #30D158;
+    --color-warning: #FFD60A;
+    --color-danger: #FF453A;
+}
+
 /* === Reset & Base === */
 *,
 *::before,
@@ -118,6 +142,12 @@ body::before {
     will-change: transform;
 }
 
+[data-theme="dark"] body::before {
+    background: radial-gradient(ellipse at 30% 20%, rgba(80, 80, 200, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 80%, rgba(200, 80, 80, 0.04) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(80, 200, 140, 0.03) 0%, transparent 60%);
+}
+
 @keyframes bgShift {
     0% {
         transform: translate(0, 0) rotate(0deg);
@@ -136,6 +166,7 @@ body::before {
     border: 1px solid var(--border-inner);
     box-shadow: var(--shadow-float), inset 0 1px 0 rgba(255, 255, 255, 0.5);
     position: relative;
+    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .glass-panel::after {
@@ -369,10 +400,18 @@ body::before {
 }
 
 /* === Language Toggle Button (Home) === */
-.btn-lang {
+/* Home page actions bar */
+.home-actions {
     position: absolute;
     top: 20px;
     right: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 10;
+}
+
+.btn-lang {
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -386,7 +425,6 @@ body::before {
     font-weight: 600;
     text-decoration: none;
     transition: var(--transition);
-    z-index: 10;
 }
 
 .btn-lang:hover {
@@ -856,6 +894,12 @@ body::before {
     border-radius: 6px;
     border: 1px solid rgba(0, 0, 0, 0.06);
     color: #e83e8c;
+}
+
+[data-theme="dark"] .markdown-preview code {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #f694c1;
     font-weight: 500;
     white-space: nowrap;
 }
@@ -1063,6 +1107,10 @@ body::before {
     background: rgba(0, 0, 0, 0.015);
 }
 
+[data-theme="dark"] .markdown-preview tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.03);
+}
+
 .markdown-preview tbody tr:hover {
     background: rgba(0, 122, 255, 0.03);
 }
@@ -1094,7 +1142,7 @@ body::before {
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     display: flex;
@@ -1215,7 +1263,7 @@ body::before {
     background: rgba(255, 193, 7, 0.1);
     border: 1px solid rgba(255, 193, 7, 0.25);
     border-radius: var(--radius-sm);
-    color: #856404;
+    color: var(--color-readonly-banner, #856404);
     font-size: 12px;
     font-weight: 600;
     flex-shrink: 0;
@@ -1237,7 +1285,7 @@ body::before {
     background: rgba(0, 122, 255, 0.08);
     border: 1px solid rgba(0, 122, 255, 0.2);
     border-radius: var(--radius-sm);
-    color: #0055b3;
+    color: var(--color-encrypted-banner, #0055b3);
     font-size: 12px;
     font-weight: 600;
     flex-shrink: 0;
@@ -1409,9 +1457,13 @@ body::before {
         gap: 14px;
     }
 
-    .btn-lang {
+    .home-actions {
         top: 14px;
         right: 16px;
+        gap: 6px;
+    }
+
+    .btn-lang {
         padding: 5px 10px;
         font-size: 11px;
     }
@@ -1436,9 +1488,21 @@ body::before {
     background: rgba(0, 0, 0, 0.2);
 }
 
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
 /* === Selection === */
 ::selection {
     background: rgba(28, 28, 30, 0.15);
+}
+
+[data-theme="dark"] ::selection {
+    background: rgba(255, 255, 255, 0.2);
 }
 
 /* === Screen Reader Only === */
@@ -1452,4 +1516,319 @@ body::before {
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border: 0;
+}
+
+/* ============================
+   THEME TOGGLE - Sun/Moon (CodePen inspired)
+   ============================ */
+
+/* === Home page: full sky toggle, sized to match lang button === */
+.theme-toggle-wrap {
+    cursor: pointer;
+    flex-shrink: 0;
+    overflow: hidden;
+    border-radius: 20px;
+}
+
+.theme-toggle-home {
+    width: 78px;
+    height: 31px;
+}
+
+/* The toggle itself (original 220x90, scaled to fit) */
+.theme-toggle {
+    position: relative;
+    width: 220px;
+    height: 90px;
+    background:
+        radial-gradient(circle at 18% 20px, #fff, #fff 6px, transparent 7px, transparent),
+        radial-gradient(circle at 35% 45px, #fff, #fff 1px, transparent 2px, transparent),
+        radial-gradient(circle at 10% 70px, #fff, #fff 2.5px, transparent 3.5px, transparent),
+        radial-gradient(circle at 25% 15px, #fff, #fff 3px, transparent 4px, transparent),
+        radial-gradient(circle at 15% 50px, #fff, #fff 1.5px, transparent 2.5px, transparent),
+        radial-gradient(circle at 30% 75px, #fff, #fff 5px, transparent 6px, transparent),
+        radial-gradient(circle at 5% 30px, #fff, #fff 0.5px, transparent 1.5px, transparent),
+        radial-gradient(circle at 25% 60px, #fff, #fff 0.5px, transparent 1.5px, transparent),
+        radial-gradient(circle at 7% 35px, #fff, #fff 0.5px, transparent 1.5px, transparent),
+        linear-gradient(90deg, #2b303e, #2b303e 50%, #5a81b4 50%, #5a81b4);
+    background-repeat: no-repeat;
+    background-size: 200% 100%;
+    background-position: 100% 0;
+    border-radius: 90px;
+    box-shadow:
+        0 -3px 4px #999,
+        inset 0 3px 5px #333,
+        0 4px 4px #ffe,
+        inset 0 -3px 5px #ddd;
+    cursor: pointer;
+    overflow: hidden;
+    transition: .5s all;
+    transform: scale(0.355);
+    transform-origin: top left;
+}
+
+.theme-toggle::before,
+.theme-toggle::after {
+    content: "";
+    position: absolute;
+    transition: .5s all;
+}
+
+.theme-toggle::before {
+    width: 75px;
+    height: 75px;
+    border-radius: 50%;
+    background: #e9cb50;
+    inset: 7.5px;
+    box-shadow:
+        0 0 5px #333,
+        inset 2px 2px 3px #f8f4e4,
+        inset -2px -2px 3px #665613;
+    z-index: 1;
+}
+
+.theme-toggle::after {
+    width: 70px;
+    height: 70px;
+    inset: 10px;
+    border-radius: 50%;
+    box-shadow:
+        10px 60px 0 10px #fff,
+        65px 60px 0 5px #fff,
+        95px 70px 0 10px #fff,
+        135px 45px 0 5px #fff,
+        170px 35px 0 10px #fff,
+        195px -5px 0 10px #fff,
+        -10px 0 0 50px rgba(255, 255, 255, .2),
+        15px 0 0 50px rgba(255, 255, 255, .15),
+        40px 0 0 50px rgba(255, 255, 255, .21),
+        10px 40px 0 10px #abc1d9,
+        70px 35px 0 10px #abc1d9,
+        95px 40px 0 10px #abc1d9,
+        135px 20px 0 10px #abc1d9,
+        155px 15px 0 10px #abc1d9,
+        190px -20px 0 10px #abc1d9;
+}
+
+.theme-toggle:hover::before {
+    filter: contrast(90%) brightness(110%);
+    scale: 1.05;
+}
+
+/* Dark mode: night sky with moon */
+[data-theme="dark"] .theme-toggle {
+    background-position: 0 0;
+    box-shadow:
+        0 -3px 4px rgba(0,0,0,0.6),
+        inset 0 3px 5px #111,
+        0 4px 4px rgba(80,80,100,0.3),
+        inset 0 -3px 5px #444;
+}
+
+[data-theme="dark"] .theme-toggle::before {
+    translate: 130px;
+    background:
+        radial-gradient(circle at 50% 20px, #939aa5, #939aa5 6.5px, transparent 7px, transparent),
+        radial-gradient(circle at 35% 45px, #939aa5, #939aa5 11.5px, transparent 12px, transparent),
+        radial-gradient(circle at 72% 50px, #939aa5, #939aa5 8.5px, transparent 9px, transparent),
+        radial-gradient(#cbcdda, #cbcdda);
+}
+
+[data-theme="dark"] .theme-toggle::after {
+    transform: translate(130px);
+    box-shadow:
+        10px 60px 0 10px transparent,
+        65px 60px 0 5px transparent,
+        95px 70px 0 10px transparent,
+        135px 45px 0 5px transparent,
+        170px 35px 0 10px transparent,
+        195px -5px 0 10px transparent,
+        10px 0 0 50px rgba(255, 255, 255, .2),
+        -15px 0 0 50px rgba(255, 255, 255, .15),
+        -40px 0 0 50px rgba(255, 255, 255, .21),
+        10px 40px 0 10px transparent,
+        70px 35px 0 10px transparent,
+        95px 40px 0 10px transparent,
+        135px 20px 0 10px transparent,
+        155px 15px 0 10px transparent,
+        190px -20px 0 10px transparent;
+}
+
+/* === Editor page: square btn-icon style with sun/moon orb only === */
+.btn-theme-editor {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    cursor: pointer;
+    transition: var(--transition);
+    user-select: none;
+    position: relative;
+    padding: 0;
+    font-family: var(--font-family);
+}
+
+.btn-theme-editor:hover {
+    background: var(--bg-white-hover);
+    border-color: var(--border-outer);
+    box-shadow: var(--shadow-subtle);
+}
+
+.btn-theme-editor:active {
+    transform: scale(0.92);
+}
+
+/* Sun orb */
+.theme-orb {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #e9cb50;
+    box-shadow:
+        0 0 6px rgba(233, 203, 80, 0.5),
+        inset 1.5px 1.5px 2px #f8f4e4,
+        inset -1.5px -1.5px 2px #665613;
+    transition: .4s all;
+}
+
+.btn-theme-editor:hover .theme-orb {
+    filter: contrast(90%) brightness(110%);
+    transform: scale(1.08);
+}
+
+/* Moon orb with craters */
+[data-theme="dark"] .theme-orb {
+    background:
+        radial-gradient(circle at 50% 6px, #939aa5, #939aa5 2px, transparent 2.5px, transparent),
+        radial-gradient(circle at 35% 13px, #939aa5, #939aa5 3.5px, transparent 4px, transparent),
+        radial-gradient(circle at 72% 15px, #939aa5, #939aa5 2.5px, transparent 3px, transparent),
+        radial-gradient(#cbcdda, #cbcdda);
+    box-shadow:
+        0 0 8px rgba(203, 205, 218, 0.4),
+        inset 1px 1px 2px rgba(255,255,255,0.3),
+        inset -1px -1px 2px rgba(0,0,0,0.15);
+}
+
+/* Dark mode specific overrides */
+[data-theme="dark"] .readonly-banner {
+    background: rgba(255, 193, 7, 0.15);
+    border-color: rgba(255, 193, 7, 0.3);
+    color: #ffd60a;
+}
+
+[data-theme="dark"] .encrypted-banner {
+    background: rgba(0, 122, 255, 0.15);
+    border-color: rgba(0, 122, 255, 0.3);
+    color: #64b5f6;
+}
+
+[data-theme="dark"] .markdown-preview blockquote {
+    background: rgba(0, 122, 255, 0.08);
+}
+
+[data-theme="dark"] .markdown-preview img {
+    opacity: 0.9;
+}
+
+[data-theme="dark"] .btn-primary {
+    color: #1C1C1E;
+}
+
+[data-theme="dark"] .toast {
+    background: #F5F5F7;
+    color: #1C1C1E;
+}
+
+/* API & TIP labels: keep dark bg + white text in dark mode */
+[data-theme="dark"] .label-industrial {
+    background: #636366;
+    color: #F5F5F7;
+}
+
+[data-theme="dark"] .label-secondary {
+    background: #48484A;
+}
+
+[data-theme="dark"] .hint-block code,
+[data-theme="dark"] .hint-text {
+    color: #A1A1A6;
+}
+
+/* Cancel/secondary button: dark background instead of hardcoded white */
+[data-theme="dark"] .btn-secondary {
+    background: #2C2C2E;
+    color: #F5F5F7;
+    border-color: rgba(68, 68, 70, 0.6);
+}
+
+[data-theme="dark"] .btn-secondary:hover {
+    background: #3A3A3C;
+}
+
+/* Modal: ensure dark theme input and text contrast */
+[data-theme="dark"] .modal {
+    background: #2C2C2E;
+    border: 1px solid rgba(68, 68, 70, 0.5);
+}
+
+[data-theme="dark"] .modal-input {
+    background: #1C1C1E;
+    color: #F5F5F7;
+    border-color: rgba(68, 68, 70, 0.4);
+}
+
+[data-theme="dark"] .modal-input::placeholder {
+    color: #636366;
+}
+
+/* Markdown preview panel: dark background when open */
+[data-theme="dark"] .markdown-preview {
+    background: var(--bg-base);
+}
+
+/* Editor focus: darker tint in dark mode */
+[data-theme="dark"] .editor:focus {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Smooth theme transition for key elements */
+body,
+.editor,
+.note-header,
+.editor-wrapper,
+.home-card,
+.modal,
+.toast,
+.btn-primary,
+.btn-secondary,
+.btn-icon,
+.readonly-banner,
+.encrypted-banner {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .theme-toggle-home {
+        width: 57px;
+        height: 24px;
+    }
+
+    .theme-toggle-home .theme-toggle {
+        transform: scale(0.26);
+    }
+
+    .btn-theme-editor {
+        width: 36px;
+        height: 36px;
+    }
+
+    .theme-orb {
+        width: 18px;
+        height: 18px;
+    }
 }

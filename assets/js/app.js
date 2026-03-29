@@ -681,4 +681,25 @@
     } else {
         init();
     }
+
+    // === Theme Toggle (Editor page) ===
+    (function() {
+        var btn = document.getElementById('btnThemeEditor');
+        if (!btn) return;
+        btn.addEventListener('click', function() {
+            var html = document.documentElement;
+            var isDark = html.getAttribute('data-theme') === 'dark';
+            if (isDark) {
+                html.removeAttribute('data-theme');
+                localStorage.setItem('easynote_theme', 'light');
+                var m = document.getElementById('metaThemeColor');
+                if (m) m.setAttribute('content', '#F2F2F7');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                localStorage.setItem('easynote_theme', 'dark');
+                var m = document.getElementById('metaThemeColor');
+                if (m) m.setAttribute('content', '#1C1C1E');
+            }
+        });
+    })();
 })();

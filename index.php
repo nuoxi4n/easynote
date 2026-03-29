@@ -544,13 +544,25 @@ function renderPage($note, $content, $encrypted, $is_home, $readonly = false, $m
     <?php else: ?>
     <meta name="robots" content="noindex, nofollow">
     <?php endif; ?>
-    <meta name="theme-color" content="#F2F2F7">
+    <meta name="theme-color" content="#F2F2F7" id="metaThemeColor">
     <title><?php echo $page_title; ?></title>
+    <!-- Anti-FOUC: apply theme before first paint -->
+    <script>
+    (function(){
+        var t=localStorage.getItem('easynote_theme');
+        if(!t){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';}
+        if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');}
+        var m=document.getElementById('metaThemeColor');
+        if(m)m.setAttribute('content',t==='dark'?'#1C1C1E':'#F2F2F7');
+    })();
+    </script>
     <!-- Inline CSS for the loader and to prevent FOUC -->
     <style>
     body { margin: 0; background: #F2F2F7; }
+    [data-theme="dark"] body { background: #1C1C1E; }
     main { opacity: 0; transition: opacity 0.4s ease; }
     #globalLoader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #F2F2F7; z-index: 9999; transition: opacity 0.4s ease; }
+    [data-theme="dark"] #globalLoader { background: #1C1C1E; }
     #globalLoader svg { width: 32px; height: 32px; color: #8E8E93; animation: spin 1s linear infinite; }
     @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
@@ -590,10 +602,15 @@ function renderPage($note, $content, $encrypted, $is_home, $readonly = false, $m
     <!-- Home Page -->
     <main class="home-container">
         <div class="home-card glass-panel">
-            <a href="<?php echo htmlspecialchars($switch_url); ?>" class="btn-lang" title="<?php echo $t['lang_switch']; ?>" aria-label="<?php echo $t['lang_switch']; ?>">
-                <img src="<?php echo $base; ?>/assets/svg/<?php echo $flag_svg; ?>" alt="" class="lang-flag" aria-hidden="true">
-                <span><?php echo $current_lang_name; ?></span>
-            </a>
+            <div class="home-actions">
+                <a href="<?php echo htmlspecialchars($switch_url); ?>" class="btn-lang" title="<?php echo $t['lang_switch']; ?>" aria-label="<?php echo $t['lang_switch']; ?>">
+                    <img src="<?php echo $base; ?>/assets/svg/<?php echo $flag_svg; ?>" alt="" class="lang-flag" aria-hidden="true">
+                    <span><?php echo $current_lang_name; ?></span>
+                </a>
+                <div class="theme-toggle-wrap theme-toggle-home" id="btnThemeHome" aria-label="Toggle dark mode">
+                    <div class="theme-toggle"></div>
+                </div>
+            </div>
             <div class="home-icon" aria-hidden="true">
                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/></svg>
             </div>
@@ -651,6 +668,26 @@ function renderPage($note, $content, $encrypted, $is_home, $readonly = false, $m
             }
         }, true);
     })();
+    // Theme toggle (home page)
+    (function() {
+        var btn = document.getElementById('btnThemeHome');
+        if (!btn) return;
+        btn.addEventListener('click', function() {
+            var html = document.documentElement;
+            var isDark = html.getAttribute('data-theme') === 'dark';
+            if (isDark) {
+                html.removeAttribute('data-theme');
+                localStorage.setItem('easynote_theme', 'light');
+                var m = document.getElementById('metaThemeColor');
+                if (m) m.setAttribute('content', '#F2F2F7');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                localStorage.setItem('easynote_theme', 'dark');
+                var m = document.getElementById('metaThemeColor');
+                if (m) m.setAttribute('content', '#1C1C1E');
+            }
+        });
+    })();
     </script>
 
     <?php else: ?>
@@ -693,6 +730,10 @@ function renderPage($note, $content, $encrypted, $is_home, $readonly = false, $m
                 <a href="<?php echo htmlspecialchars($switch_url); ?>" class="btn-icon btn-lang-editor" title="<?php echo $t['lang_switch']; ?>" aria-label="<?php echo $t['lang_switch']; ?>">
                     <img src="<?php echo $base; ?>/assets/svg/<?php echo $flag_svg; ?>" alt="" class="lang-flag" aria-hidden="true">
                 </a>
+
+                <button class="btn-theme-editor" id="btnThemeEditor" type="button" aria-label="Toggle dark mode">
+                    <div class="theme-orb"></div>
+                </button>
             </div>
         </header>
         
