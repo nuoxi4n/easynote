@@ -1749,6 +1749,19 @@ body::before {
     color: #1C1C1E;
 }
 
+/* Dark mode: improve markdown toggle contrast */
+[data-theme="dark"] #btnMarkdown {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.16);
+    color: #E5E5EA;
+}
+
+[data-theme="dark"] #btnMarkdown:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.28);
+    color: #F5F5F7;
+}
+
 [data-theme="dark"] .toast {
     background: #F5F5F7;
     color: #1C1C1E;
